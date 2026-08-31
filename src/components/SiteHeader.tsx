@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { ChevronDown, Mail, Menu, X } from "lucide-react";
+import { ChevronDown, Globe, Mail, Menu, X } from "lucide-react";
+import logoAsset from "@/assets/logo-giarmata.png.asset.json";
 
 type MenuItem = {
   label: string;
@@ -21,24 +22,71 @@ const MENU: MenuItem[] = [
   { label: "Contact" },
 ];
 
-function DesktopItem({ item }: { item: MenuItem }) {
+const LANGS = [
+  { code: "RO", label: "Română" },
+  { code: "EN", label: "English" },
+];
+
+function LanguageSelector({ tone = "light" }: { tone?: "light" | "dark" }) {
+  const [open, setOpen] = useState(false);
+  const [active, setActive] = useState("RO");
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        aria-label="Selector de limbă"
+        className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold tracking-wide transition-colors ${
+          tone === "dark"
+            ? "bg-primary-foreground/15 text-primary-foreground hover:bg-primary-foreground/25"
+            : "border border-border bg-card text-foreground hover:border-primary hover:text-primary"
+        }`}
+      >
+        <Globe className="size-3.5 shrink-0" />
+        {active}
+        <ChevronDown className={`size-3 transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && (
+        <ul className="absolute right-0 top-full z-40 mt-2 w-36 overflow-hidden rounded-xl border border-border bg-popover p-1.5 shadow-[var(--shadow-menu)]">
+          {LANGS.map((lang) => (
+            <li key={lang.code}>
+              <button
+                onClick={() => {
+                  setActive(lang.code);
+                  setOpen(false);
+                }}
+                className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors hover:bg-secondary hover:text-primary ${
+                  active === lang.code ? "font-semibold text-primary" : "text-popover-foreground"
+                }`}
+              >
+                {lang.label}
+                <span className="text-[0.65rem] font-bold opacity-60">{lang.code}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function NavPill({ item }: { item: MenuItem }) {
   return (
     <div className="group relative">
-      <button className="flex h-full w-full items-center justify-center gap-1.5 rounded-lg px-3 py-3 text-center text-[0.8rem] font-semibold leading-tight text-foreground transition-colors duration-200 group-hover:bg-secondary group-hover:text-primary">
+      <button className="flex h-14 w-full items-center justify-center gap-1.5 rounded-full border border-transparent px-3 text-center text-[0.78rem] font-semibold leading-tight text-primary-foreground/90 transition-all duration-200 group-hover:border-primary-foreground/25 group-hover:bg-primary-foreground/12 group-hover:text-primary-foreground">
         <span className="line-clamp-2">{item.label}</span>
         {item.children && (
-          <ChevronDown className="mt-0.5 size-3.5 shrink-0 opacity-60 transition-transform duration-200 group-hover:rotate-180" />
+          <ChevronDown className="size-3.5 shrink-0 opacity-70 transition-transform duration-200 group-hover:rotate-180" />
         )}
       </button>
-      <span className="pointer-events-none absolute inset-x-3 -bottom-px h-0.5 origin-center scale-x-0 rounded-full bg-primary transition-transform duration-300 group-hover:scale-x-100" />
       {item.children && (
-        <div className="invisible absolute left-1/2 top-full z-30 w-60 -translate-x-1/2 translate-y-1 opacity-0 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
-          <ul className="mt-2 overflow-hidden rounded-xl border border-border bg-popover p-1.5 shadow-[var(--shadow-menu)]">
+        <div className="invisible absolute left-1/2 top-full z-30 w-60 -translate-x-1/2 translate-y-2 opacity-0 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
+          <ul className="mt-1 overflow-hidden rounded-2xl border border-border bg-popover p-1.5 shadow-[var(--shadow-menu)]">
             {item.children.map((child) => (
               <li key={child}>
                 <a
                   href="#"
-                  className="block rounded-lg px-3 py-2 text-sm text-popover-foreground transition-colors hover:bg-secondary hover:text-primary"
+                  className="block rounded-xl px-3 py-2 text-sm text-popover-foreground transition-colors hover:bg-secondary hover:text-primary"
                 >
                   {child}
                 </a>
@@ -58,34 +106,36 @@ export function SiteHeader() {
   const rows = [MENU.slice(0, 6), MENU.slice(6, 12)];
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur">
-      {/* Top bar */}
-      <div className="bg-[image:var(--gradient-brand)] text-primary-foreground">
+    <header className="sticky top-0 z-40 w-full">
+      {/* Identity bar */}
+      <div className="border-b border-border bg-background/95 backdrop-blur">
         <div className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-4 py-3 sm:flex sm:justify-between">
-          <div className="flex min-w-0 items-center gap-3">
-            <div className="grid size-11 shrink-0 place-items-center rounded-xl bg-primary-foreground/15 text-base font-black tracking-tight">
-              SG
-            </div>
-            <div className="min-w-0">
-              <p className="truncate text-sm font-medium opacity-80">Școala Gimnazială</p>
-              <p className="truncate text-lg font-extrabold leading-tight tracking-tight">Giarmata</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-4">
+          <a href="#" className="flex min-w-0 items-center gap-3">
+            <img
+              src={logoAsset.url}
+              alt="Sigla Școlii Gimnaziale Giarmata"
+              className="size-12 shrink-0 object-contain"
+            />
+            <span className="min-w-0">
+              <span className="block truncate text-sm text-muted-foreground">Școala Gimnazială</span>
+              <span className="block truncate text-lg font-extrabold leading-tight tracking-tight text-primary">
+                Giarmata
+              </span>
+            </span>
+          </a>
+          <div className="flex items-center gap-3">
             <a
               href="mailto:secretariat@edugiarmata.ro"
-              className="hidden items-center gap-2 text-sm font-medium opacity-90 transition-opacity hover:opacity-100 md:flex"
+              className="hidden items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-sm text-foreground transition-colors hover:border-primary hover:text-primary md:flex"
             >
               <Mail className="size-4 shrink-0" />
               secretariat@edugiarmata.ro
             </a>
-            <span className="hidden rounded-full bg-primary-foreground/15 px-3 py-1 text-xs font-semibold lg:inline-block">
-              PNRAȘ-PNRR 2022-2025
-            </span>
+            <LanguageSelector />
             <button
               onClick={() => setMobileOpen((v) => !v)}
               aria-label="Meniu"
-              className="grid size-10 place-items-center rounded-lg bg-primary-foreground/15 lg:hidden"
+              className="grid size-10 place-items-center rounded-lg bg-primary text-primary-foreground lg:hidden"
             >
               {mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
             </button>
@@ -93,34 +143,33 @@ export function SiteHeader() {
         </div>
       </div>
 
-      {/* Desktop: 2 symmetric rows of 6 */}
-      <nav className="mx-auto hidden max-w-7xl px-4 lg:block">
-        {rows.map((row, i) => (
-          <div
-            key={i}
-            className={`grid grid-cols-6 items-stretch ${i === 0 ? "border-b border-border/70" : ""}`}
-          >
-            {row.map((item) => (
-              <DesktopItem key={item.label} item={item} />
-            ))}
-          </div>
-        ))}
+      {/* Desktop nav: dark brand band, 2 symmetric rows of 6 pills */}
+      <nav className="hidden bg-[image:var(--gradient-brand)] shadow-[var(--shadow-soft)] lg:block">
+        <div className="mx-auto max-w-7xl space-y-1 px-4 py-2">
+          {rows.map((row, i) => (
+            <div key={i} className="grid grid-cols-6 gap-1.5">
+              {row.map((item) => (
+                <NavPill key={item.label} item={item} />
+              ))}
+            </div>
+          ))}
+        </div>
       </nav>
 
-      {/* Mobile */}
+      {/* Mobile nav */}
       {mobileOpen && (
-        <nav className="border-t border-border lg:hidden">
-          <ul className="mx-auto max-w-7xl divide-y divide-border px-4">
+        <nav className="bg-[image:var(--gradient-brand)] lg:hidden">
+          <ul className="mx-auto max-w-7xl divide-y divide-primary-foreground/15 px-4">
             {MENU.map((item) => (
               <li key={item.label}>
                 <button
                   onClick={() => setOpenGroup(openGroup === item.label ? null : item.label)}
-                  className="flex w-full items-center justify-between gap-3 py-3 text-left text-sm font-semibold text-foreground"
+                  className="flex w-full items-center justify-between gap-3 py-3 text-left text-sm font-semibold text-primary-foreground"
                 >
                   <span className="min-w-0">{item.label}</span>
                   {item.children && (
                     <ChevronDown
-                      className={`size-4 shrink-0 opacity-60 transition-transform ${openGroup === item.label ? "rotate-180" : ""}`}
+                      className={`size-4 shrink-0 opacity-70 transition-transform ${openGroup === item.label ? "rotate-180" : ""}`}
                     />
                   )}
                 </button>
@@ -128,7 +177,7 @@ export function SiteHeader() {
                   <ul className="pb-3 pl-3">
                     {item.children.map((child) => (
                       <li key={child}>
-                        <a href="#" className="block py-2 text-sm text-muted-foreground">
+                        <a href="#" className="block py-2 text-sm text-primary-foreground/80">
                           {child}
                         </a>
                       </li>
